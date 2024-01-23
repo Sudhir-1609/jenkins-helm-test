@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "flasksample.fullname" . }}-2
+  labels:
+    {{- include "flasksample.labels" . | nindent 4 }}-2
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 5000
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "flasksample.selectorLabels" . | nindent 4 }}-2

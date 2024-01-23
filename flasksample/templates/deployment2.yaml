@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "flasksample.fullname" . }}-2
+  labels:
+    {{- include "flasksample.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.deployment2.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "flasksample.selectorLabels" . | nindent 6 }}-2
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}-2
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "flasksample.selectorLabels" . | nindent 8 }}-2
+    spec:
+      {{- with .Values.deployment2.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "flasksample.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.deployment2.image.repository }}:{{ .Values.deployment2.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.deployment2.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: 5000
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: 5000
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,121 @@
+# Default values for flasksample.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+deployment1: 
+  replicaCount: 1
+  
+  image:
+    repository: shravanc97/flask_app   
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: v1
+  
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  
+deployment2: 
+  replicaCount: 1
+  
+  image:
+    repository: shravanc97/flask_app_locations  
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: v2
+  
+  imagePullSecrets: []
+  nameOverride: ""  
+  fullnameOverride: "" 
+# targetGroupBinding:
+#   name: flasksample-tg-binding
+#   serviceRefName: flasksample
+#   targetGroupARN: arn:aws:elasticloadbalancing:ap-south-1:562922379100:targetgroup/app1-target-group/6f0abca88a72c7bf
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: NodePort
+  port: 5000
+  TargetPort: 5000
+  protocol: TCP
+
+
+ingress:
+  enabled: false
+  className: "alb"
+  annotations: 
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/load-balancer-name: "olalb1"
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:562922379100:certificate/76b8a509-8739-4f15-9fb4-767d86f067ad
+    # alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    # alb.ingress.kubernetes.io/scheme: internet-facing
+  
+
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    # - host: 
+      - paths: 
+        - path: /service1
+          pathType: ImplementationSpecific
+          backend:
+              serviceName: flasksample
+              servicePort: 5000
+  tls: []
+
+  # service:
+  # enabled: true
+  # name: flasksample
+  # port: 80
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+  limits:
+    cpu: 1
+    memory: 500Mi
+  requests:
+    cpu: 1
+    memory: 500Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+  # deployment: flask
+
+tolerations: []
+#  - key: deployment
+#      operator: Equal
+#      value: flask
+#      effect: NoSchedule
+   
+
+affinity: {}
